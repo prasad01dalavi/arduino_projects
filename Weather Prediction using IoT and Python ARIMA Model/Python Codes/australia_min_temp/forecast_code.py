@@ -125,6 +125,7 @@ from pandas import Series
 from statsmodels.tsa.arima_model import ARIMA
 import numpy
 
+predicted_dataset = []
 # create a differenced series
 def difference(dataset, interval=1):
 	diff = list()
@@ -156,4 +157,22 @@ for yhat in forecast:
 	print('Day %d: %f' % (day, inverted))
 	history.append(inverted)
 	day += 1
+	predicted_dataset.append(inverted)
+
+import csv
+from matplotlib import pyplot as plt
+
+with open('validation.csv') as csvfile:
+	read_csv = csv.reader(csvfile, delimiter=',')
+
+	test_dataset = []
+	date = []
+	for row in read_csv:
+		date.append(row[0])
+		test_dataset.append(float(row[1]))
+
+plt.ylim(50)
+plt.plot(date, test_dataset)
+plt.plot(date, predicted_dataset)
+plt.show()
 # ---------------------------------------------------------------------------------------------------
