@@ -115,7 +115,7 @@ void loop()
   delay(2000);                  								  // Delay for showing that dew point value on lcd
 
   // Now upload these measure values on thingspeak cloud so calling the function -> thingspeak_upload() to upload these values
- // thingspeak_upload(temperature_celsius, humidity_percentage, dPC, pressure); 
+  thingspeak_upload(temperature_celsius, humidity_percentage, dPC, pressure); 
 }
 
 
@@ -174,33 +174,40 @@ void thingspeak_upload(float temp, float humid, float dew, int pressure)
   getStr += apiKey;                         // attaching write api key abtained from thingspeak 
   getStr +="&field1=";                      // attach the field number to which we want to upload the value here it is field 1 
   getStr += String(strTemp);                // uploading temperature value to thingspeak field1
-  getStr +="&field2=";
-  getStr += String(strHumid);
-  getStr +="&field3=";
-  getStr += String(strDew);
-  getStr +="&field4=";
-  getStr += String(strPressure);
-  getStr += "\r\n\r\n";  //press 'enter' using software command (carriage return and new line)
+  getStr +="&field2=";						// want to use field2 
+  getStr += String(strHumid);               // uploading humidity value in % on field2
+  getStr +="&field3=";                      // want to use field3
+  getStr += String(strDew);                 // uploading dew point in celsius value on field3
+  getStr +="&field4=";                      // want to use field4
+  getStr += String(strPressure);            // uploading pressure in pascal on field4 of thingspeak
+  getStr += "\r\n\r\n";  					// press 'enter' using software command (carriage return and new line)
 
-  // send data length
+  // before sending the GET string we will inform ESP822 about the length of data that we want to upload on thingspeak
   cmd = "AT+CIPSEND=";
-  cmd += String(getStr.length());
-  ser.println(cmd);
-  Serial.println(cmd);
+  cmd += String(getStr.length());           // measuring the length of our GET string
+  ser.println(cmd);                         // now sending 'AT+CIPSEND=<length of GET string>' to ESP8266 
+  Serial.println(cmd);                      // also displaying it on serial monitor
 
-  if(ser.find(">")){
-    ser.print(getStr);
-    Serial.println(getStr);
+  if(ser.find(">"))                         // if we receive '>' from ESP8266 means ESP8266 has made successful connection with thingspeak cloud
+  {
+    ser.print(getStr);                      // GET request will be forwared by ESP8266 to upload the data on thingspeak
+    Serial.println(getStr);                 // Display the GET Request string on serial monitor for debugging and to know field the values which will be uploaded
+    // display the success message on lcd also
+  	lcd.clear();				            // first clear the lcd display
+  	lcd.setCursor(0,0);  		            // Set lcd cursor to 1st row 1st column
+  	lcd.print("Upload Success!")           // display the uploading message on lcd
+  	delay(2000);
   }
-  else{
-    ser.println("AT+CIPCLOSE");
-    // alert user
-    Serial.println("AT+CIPCLOSE");
+  else                                      // else it means ESP8266 has lost the connection to thingspeak cloud 
+  { 
+    ser.println("AT+CIPCLOSE");             // As ESP8266 has lost the connection, we need to close the connection using this command
+    Serial.println("Closing the connection...");          // Display the message of closing the connection on serial monitor
+
   }
 
   // thingspeak needs 15 sec delay between updates
-  ser.println("AT+RST");
-  delay(30000);  // giving 30 sec delay for updates
+  ser.println("AT+RST");                            // Restart ESP8266 for new value upload
+  delay(30000);                                     // giving 30 sec delay for uploading thingspeak data
 }
 
 double dewPointFast(double celsius, double humidity)    // Function definition to calculate Dew with the help of temperature and humidity 
