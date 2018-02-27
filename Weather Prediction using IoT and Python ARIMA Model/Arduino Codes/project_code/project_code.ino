@@ -28,15 +28,15 @@ The DHT11 Circuit:
  * 7. GND  8. Tx  
  */
  
-#include <SoftwareSerial.h>  // to use arduino software uart
-#include <stdlib.h>  // for string operations
+#include <SoftwareSerial.h>  			 // to use arduino software uart
+#include <stdlib.h>  					 // for string operations
 #include <LiquidCrystal.h>               // Include LCD Library
 #include <DHT.h>                         // Include library for DHT11 Sensor
 #include <Wire.h>                        // I2C lcd Protocol Library
 #include <Adafruit_BMP085.h>             // Include BMP180 Sensor Library
 
 // function prototypes
-void thingspeak_upload();
+void thingspeak_upload();                               // Function prototype (this function is used for uploading the data on thingspeak cloud)
 double dewPointFast(double celsius, double humidity);   // Function Prototype (this function is used for calculating the dew point0
 
 // variables declaration
@@ -46,7 +46,7 @@ float temperature_celsius;               // Declare a variable to hold the data 
 float humidity_percentage;               // Declare a variable to hold the data of the humidity percentage 
 float dPC;                               // Declare a variable to store the dew point value in Celsius
 int pressure;                            // Declare a variable to store the pressure read from bmp in pascals
-String apiKey = "RFNJ9N1B8XSZUYQY";      // thingspeak API key
+String apiKey = "RFNJ9N1B8XSZUYQY";      // thingspeak API key for authenticate uploding of data on cloud
 
 SoftwareSerial ser(10, 11);              // pin #10 = Tx and pin #11 = Rx (connect Tx of ESP to pin 10 and Rx of ESP to 11)
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);     // Create an object of lcd
@@ -55,13 +55,12 @@ Adafruit_BMP085 bmp;                     // Create an object of BMP library
 
 void setup() 
 {                
-  pinMode(ledPin, OUTPUT);  // making led pin as output
-  lcd.begin(16, 2);         // set up the LCD's number of columns and rows   
-  Serial.begin(9600);       // setting hardware uart baudrate and starting serial communication
-  ser.begin(9600);          // setting software uart baudrate and starting serial communication  
-  dht.begin();              // Start the DHT sensor reading program
-  
-  ser.println("AT+RST");   // restart ESP8266
+  pinMode(ledPin, OUTPUT);  			// making led pin as output
+  lcd.begin(16, 2);         			// set up the LCD's number of columns and rows   
+  Serial.begin(9600);       			// setting hardware uart baudrate and starting serial communication
+  ser.begin(9600);          			// setting software uart baudrate and starting serial communication  
+  dht.begin();              			// Start the DHT sensor reading program  
+  ser.println("AT+RST");   				// restart ESP8266
   
 // displayig initial introduction of project
   lcd.print("Weather Forecast !");      // Print a message to the LCD.
@@ -74,60 +73,70 @@ void loop()
   // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)  
 
-  temperature_celsius = dht.readTemperature();  // Declare a variable as well as read the temperature value in *c
-  lcd.clear();  //clear the lcd screen
-  lcd.setCursor(0,0);  
-  lcd.print("  Temperature");
-  lcd.setCursor(0,1);
-  lcd.print("    ");   //achieving center of second line
-  lcd.print(temperature_celsius);
-  lcd.print(" *C ");
-  delay(2000);
+  temperature_celsius = dht.readTemperature(); 			 // Declare a variable as well as read the temperature value in *c
+  lcd.clear();  										 // clear the lcd screen
+  lcd.setCursor(0,0);  								     // Set lcd cursor to 1st row 1st column
+  lcd.print("  Temperature");                            // print the message on lcd
+  lcd.setCursor(0,1);                                    // select 1st column second row i.e. second line(row) of 16x2 lcd
+  lcd.print("    ");   									 // achieving center of second line
+  lcd.print(temperature_celsius);                        // display temperature value on lcd
+  lcd.print(" *C ");                                     // read temperature is in degree celsius
+  delay(2000);                                           // Delay for showing that temperature value on lcd
   
-  humidity_percentage = dht.readHumidity();     // Declare a variable as well as read the Humid value in %
-  lcd.clear();  //clear the lcd screen
-  lcd.setCursor(0,0);  
-  lcd.print("    Humidity");
-  lcd.setCursor(0,1);
-  lcd.print("     ");   //achieving center of second line
-  lcd.print(humidity_percentage);
-  lcd.print("%");
-  delay(2000);
+  humidity_percentage = dht.readHumidity();     		 // Declare a variable as well as read the Humid value in %
+  lcd.clear();  										 // clear the lcd screen
+  lcd.setCursor(0,0);  									 // Set lcd cursor to 1st row 1st column
+  lcd.print("    Humidity");							 // print the message on lcd			
+  lcd.setCursor(0,1);									 // select 1st column second row i.e. second line(row) of 16x2 lcd
+  lcd.print("     ");   								 // achieving center of second line
+  lcd.print(humidity_percentage);						 // display humidity value on lcd
+  lcd.print("%");                                        // humidity value is expressed in percentage
+  delay(2000);											 // Delay for showing that humidity value on lcd
+  
   
   dPC = dewPointFast(temperature_celsius, humidity_percentage);   // Call the function to calculate dew point in celcius
-  lcd.clear();  //clear the lcd screen
-  lcd.setCursor(0,0);  
-  lcd.print("    Dew Point");
-  lcd.setCursor(0,1);
-  lcd.print("     ");   //achieving center of second line
-  lcd.print(dPC);
-  lcd.print(" *C ");
-  delay(2000);
+  lcd.clear(); 													  // clear the lcd screen
+  lcd.setCursor(0,0);  										      // Set lcd cursor to 1st row 1st column
+  lcd.print("    Dew Point");								      // print the message on lcd	
+  lcd.setCursor(0,1);                                             // select 1st column second row i.e. second line(row) of 16x2 lcd  
+  lcd.print("     ");  										      // achieving center of second line
+  lcd.print(dPC);												  // display the dew point value (can be -ve also)
+  lcd.print(" *C ");											  // dew point value is in degree celsius
+  delay(2000);													  // Delay for showing that dew point value on lcd
 
-  pressure = bmp.readPressure();
-  lcd.clear();  //clear the lcd screen
-  lcd.setCursor(0,0);  
-  lcd.print("    Pressure");
-  lcd.setCursor(0,1);
-  lcd.print("     ");   //achieving center of second line
-  lcd.print(pressure);
-  lcd.print(" Pa");
-  delay(2000);                  
- // thingspeak_upload(temperature_celsius, humidity_percentage, dPC, pressure);
+  pressure = bmp.readPressure();								  // Declare a variable as well as read the pressure value in pascals
+  lcd.clear();  												  // clear the lcd screen
+  lcd.setCursor(0,0);  											  // Set lcd cursor to 1st row 1st column
+  lcd.print("    Pressure");									  // print the message on lcd
+  lcd.setCursor(0,1);											  // select 1st column second row i.e. second line(row) of 16x2 lcd
+  lcd.print("     ");   										  // achieving center of second line
+  lcd.print(pressure);											  // display the pressure value on lcd
+  lcd.print(" Pa");												  // pressure value is measure in pascals from BMP180(temperature and pressure) Sensor
+  delay(2000);                  								  // Delay for showing that dew point value on lcd
+
+  // Now upload these measure values on thingspeak cloud so calling the function -> thingspeak_upload() to upload these values
+ // thingspeak_upload(temperature_celsius, humidity_percentage, dPC, pressure); 
 }
 
 
 void thingspeak_upload(float temp, float humid, float dew, int pressure)
 {
-  // blink LED on board
+  // blink LED on board to indicate that data uploading process has been started
   digitalWrite(ledPin, HIGH);   
   delay(500);               
   digitalWrite(ledPin, LOW);
   
-  // convert to string
-  char tempBuf[16];   // declaring a buffer array
+  // Show uploading process has been started on lcd display
+  lcd.clear();				         // first clear the lcd display
+  lcd.setCursor(0,0);  		         // Set lcd cursor to 1st row 1st column
+  lcd.print("Uploading Data..")      // display the uploading message on lcd
+  delay(1000);                       // just wait a second                   
+
+  // convert to string so that we can upload that value on thingspeak
+  char tempBuf[16];   							  // declaring a buffer array for string conversion of the value
   String strTemp = dtostrf(temp, 4, 1, tempBuf);  // this will convert the number using buffer and stdlib function
 
+  // similarly converting the other values into the string 
   char humidBuf[16];
   String strHumid = dtostrf(humid, 4, 1, humidBuf);
 
@@ -137,24 +146,34 @@ void thingspeak_upload(float temp, float humid, float dew, int pressure)
   char pressureBuf[16];
   String strPressure= dtostrf(pressure, 4, 1, pressureBuf);
 
+  // printing the string values on serial monitor to verify that the conversion is successfully done
   Serial.println(strTemp);
+  Serial.println(strHumid);
+  Serial.println(strDew);
+  Serial.println(strPressure);
 
-  // TCP connection
+  // now starting the process of uploading the data by first making the TCP connection to the cloud 
   String cmd = "AT+CIPSTART=\"TCP\",\"";
-  cmd += "184.106.153.149"; // api.thingspeak.com
-  cmd += "\",80";
-  ser.println(cmd);
+  cmd += "184.106.153.149"; 				// api.thingspeak.com i.e. Thingspeak cloud ip address
+  cmd += "\",80";							// specifying the port number i.e. actually HTTP port
+  ser.println(cmd);                         // sending this connection information to ESP8266 which will forward it to cloud using wifi internet connection
 
-  if(ser.find("Error")){
-    Serial.println("AT+CIPSTART error");
+  if(ser.find("Error"))					    // If any error accured while forwarding the connection request to cloud
+  {					
+    Serial.println("AT+CIPSTART error");    // The connection error will be displayed on serial monitor 
+ 	// display the error message on lcd also
+  	lcd.clear();				            // first clear the lcd display
+  	lcd.setCursor(0,0);  		            // Set lcd cursor to 1st row 1st column
+  	lcd.print("Uploading Failed")           // display the uploading message on lcd
+  	delay(2000);
     return;
   }
 
   // prepare GET string
-  String getStr = "GET /update?api_key=";
-  getStr += apiKey;
-  getStr +="&field1=";
-  getStr += String(strTemp);
+  String getStr = "GET /update?api_key=";   // Uploading data using Thigspeak API (Application Programming Interface)
+  getStr += apiKey;                         // attaching write api key abtained from thingspeak 
+  getStr +="&field1=";                      // attach the field number to which we want to upload the value here it is field 1 
+  getStr += String(strTemp);                // uploading temperature value to thingspeak field1
   getStr +="&field2=";
   getStr += String(strHumid);
   getStr +="&field3=";
