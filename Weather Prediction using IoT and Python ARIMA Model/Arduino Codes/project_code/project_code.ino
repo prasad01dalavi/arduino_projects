@@ -129,7 +129,7 @@ void thingspeak_upload(float temp, float humid, float dew, int pressure)
   // Show uploading process has been started on lcd display
   lcd.clear();				         // first clear the lcd display
   lcd.setCursor(0,0);  		         // Set lcd cursor to 1st row 1st column
-  lcd.print("Uploading Data..")      // display the uploading message on lcd
+  lcd.print("Uploading Data..");      // display the uploading message on lcd
   delay(1000);                       // just wait a second                   
 
   // convert to string so that we can upload that value on thingspeak
@@ -164,7 +164,7 @@ void thingspeak_upload(float temp, float humid, float dew, int pressure)
  	// display the error message on lcd also
   	lcd.clear();				            // first clear the lcd display
   	lcd.setCursor(0,0);  		            // Set lcd cursor to 1st row 1st column
-  	lcd.print("Uploading Failed")           // display the uploading message on lcd
+  	lcd.print("Uploading Failed");           // display the uploading message on lcd
   	delay(2000);
     return;
   }
@@ -195,7 +195,7 @@ void thingspeak_upload(float temp, float humid, float dew, int pressure)
     // display the success message on lcd also
   	lcd.clear();				            // first clear the lcd display
   	lcd.setCursor(0,0);  		            // Set lcd cursor to 1st row 1st column
-  	lcd.print("Upload Success!")           // display the uploading message on lcd
+  	lcd.print("Upload Success!");           // display the uploading message on lcd
   	delay(2000);
   }
   else                                      // else it means ESP8266 has lost the connection to thingspeak cloud 
