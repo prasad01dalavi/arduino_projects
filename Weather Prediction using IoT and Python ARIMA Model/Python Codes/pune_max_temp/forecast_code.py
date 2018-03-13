@@ -171,7 +171,10 @@ with open('validation.csv') as csvfile:
 		date.append(row[0])
 		test_dataset.append(float(row[1]))
 
-plt.ylim(0,50)
-plt.plot(date, test_dataset)
-plt.plot(date, predicted_dataset)
+plt.ylim(0, 50)
+plt.plot(date, test_dataset,'bo-', label="Actual Recorded Temperature")
+plt.plot(date, predicted_dataset, 'ro-', label="Predicted Temperature")
+plt.xlabel('Days')
+plt.ylabel('Temperature in Degree Celsius')
+plt.legend()
 plt.show()
